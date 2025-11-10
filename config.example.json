@@ -1,0 +1,28 @@
+# Configuration file for LPGA Face Recognition System
+# Copy this to config.json and adjust as needed
+
+{
+    "dataset_dir": "dataset",
+    "embeddings_file": "player_embeddings.pkl",
+    "model_name": "buffalo_l",
+    "threshold": 0.65,
+    "processing_fps": 5.0,
+    "cooldown_seconds": 1.0,
+    "output_url": null,
+    
+    "video_settings": {
+        "default_source": 0,
+        "show_window": true,
+        "draw_boxes": true
+    },
+    
+    "ocr_settings": {
+        "enabled": false,
+        "crop_region": {
+            "x": 212,
+            "y": 51,
+            "width": 403,
+            "height": 99
+        }
+    }
+}

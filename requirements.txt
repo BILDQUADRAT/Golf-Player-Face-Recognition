@@ -1,0 +1,10 @@
+opencv-python>=4.10.0
+numpy>=1.26.0
+insightface>=0.7.3
+scikit-learn>=1.5.0
+tqdm>=4.66.0
+requests>=2.32.0
+scipy>=1.13.0
+Pillow>=10.4.0
+pytesseract>=0.3.10
+onnxruntime>=1.18.0
