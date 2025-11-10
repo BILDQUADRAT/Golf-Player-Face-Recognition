@@ -5,13 +5,13 @@ echo "=== LPGA Face Recognition Setup ==="
 echo ""
 
 # Check Python version
-python_version=$(python3 --version 2>&1 | awk '{print $2}')
+python_version=$(python --version 2>&1 | awk '{print $2}')
 echo "Detected Python version: $python_version"
 
 # Create virtual environment
 echo ""
 echo "Creating virtual environment..."
-python3 -m venv venv
+python -m venv venv
 
 # Activate virtual environment
 echo "Activating virtual environment..."
