@@ -39,6 +39,6 @@ echo To activate the environment, run:
 echo   venv\Scripts\activate.bat
 echo.
 echo To run the script:
-echo   python cutlist_generator_v3.py --help
+echo   python golf_player_face_recognition.py --help
 echo.
 pause

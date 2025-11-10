@@ -8,7 +8,7 @@
 All files have been updated and are ready to use:
 
 ### Core Files
-- **`cutlist_generator_v3.py`** - Main application (modernized, Python 3.13 compatible)
+- **`golf_player_face_recognition.py`** - Main application (modernized, Python 3.13 compatible)
 - **`requirements.txt`** - All dependencies with version pinning
 - **`README.md`** - Complete usage documentation
 - **`MIGRATION.md`** - Detailed v2 → v3 migration guide
@@ -79,13 +79,13 @@ Just uncomment and use `--output_url` parameter!
 **Model options:**
 ```bash
 # Default (recommended)
-python cutlist_generator_v3.py --recognize --model buffalo_l
+python golf_player_face_recognition.py --recognize --model buffalo_l
 
 # More accurate but slower
-python cutlist_generator_v3.py --recognize --model buffalo_sc
+python golf_player_face_recognition.py --recognize --model buffalo_sc
 
 # Faster but less accurate
-python cutlist_generator_v3.py --recognize --model buffalo_s
+python golf_player_face_recognition.py --recognize --model buffalo_s
 ```
 
 ---
@@ -113,7 +113,7 @@ venv\Scripts\activate.bat       # Windows
 **Step 3: Prepare Dataset**
 ```bash
 # Build dataset (you'll need to add image source)
-python cutlist_generator_v3.py --build_dataset
+python golf_player_face_recognition.py --build_dataset
 
 # OR manually create:
 # dataset/Player_Name/image1.jpg
@@ -122,16 +122,16 @@ python cutlist_generator_v3.py --build_dataset
 
 **Step 4: Generate Embeddings**
 ```bash
-python cutlist_generator_v3.py --generate_embeddings
+python golf_player_face_recognition.py --generate_embeddings
 ```
 
 **Step 5: Run Recognition**
 ```bash
 # From webcam (source 0)
-python cutlist_generator_v3.py --recognize
+python golf_player_face_recognition.py --recognize
 
 # From your video source (e.g., source 10)
-python cutlist_generator_v3.py --recognize --source 10 --threshold 0.65
+python golf_player_face_recognition.py --recognize --source 10 --threshold 0.65
 ```
 
 ---
@@ -159,27 +159,27 @@ python cutlist_generator_v3.py --recognize --source 10 --threshold 0.65
 
 ### Basic Recognition
 ```bash
-python cutlist_generator_v3.py --recognize
+python golf_player_face_recognition.py --recognize
 ```
 
 ### Custom Video Source
 ```bash
-python cutlist_generator_v3.py --recognize --source 10
+python golf_player_face_recognition.py --recognize --source 10
 ```
 
 ### Adjust Confidence Threshold
 ```bash
-python cutlist_generator_v3.py --recognize --threshold 0.7
+python golf_player_face_recognition.py --recognize --threshold 0.7
 ```
 
 ### Use High-Accuracy Model
 ```bash
-python cutlist_generator_v3.py --recognize --model buffalo_sc
+python golf_player_face_recognition.py --recognize --model buffalo_sc
 ```
 
 ### Prepare for Web Server (Future)
 ```bash
-python cutlist_generator_v3.py --recognize --output_url http://localhost:8000/api/player
+python golf_player_face_recognition.py --recognize --output_url http://localhost:8000/api/player
 ```
 
 ---
@@ -187,7 +187,7 @@ python cutlist_generator_v3.py --recognize --output_url http://localhost:8000/ap
 ## 🔧 Customization
 
 ### Adjust Processing Speed
-Edit the `Config` class in `cutlist_generator_v3.py`:
+Edit the `Config` class in `golf_player_face_recognition.py`:
 
 ```python
 @dataclass
@@ -198,7 +198,7 @@ class Config:
 
 ### Change Threshold Dynamically
 ```bash
-python cutlist_generator_v3.py --recognize --threshold 0.75
+python golf_player_face_recognition.py --recognize --threshold 0.75
 ```
 
 ---
@@ -240,14 +240,14 @@ pip install -r requirements.txt
 ### "Embeddings file not found"
 ```bash
 # Generate embeddings first
-python cutlist_generator_v3.py --generate_embeddings
+python golf_player_face_recognition.py --generate_embeddings
 ```
 
 ### "Cannot open video source"
 ```bash
 # Try different source IDs
-python cutlist_generator_v3.py --recognize --source 0
-python cutlist_generator_v3.py --recognize --source 1
+python golf_player_face_recognition.py --recognize --source 0
+python golf_player_face_recognition.py --recognize --source 1
 # etc.
 ```
 

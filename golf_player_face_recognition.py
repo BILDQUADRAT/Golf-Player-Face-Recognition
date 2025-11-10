@@ -273,16 +273,16 @@ def main():
         epilog="""
 Examples:
   # Generate embeddings from dataset
-  python cutlist_generator_v3.py --generate_embeddings
+  python golf_player_face_recognition.py --generate_embeddings
   
   # Run real-time recognition on webcam
-  python cutlist_generator_v3.py --recognize --source 0
+  python golf_player_face_recognition.py --recognize --source 0
   
   # Run with custom threshold
-  python cutlist_generator_v3.py --recognize --source 0 --threshold 0.7
+  python golf_player_face_recognition.py --recognize --source 0 --threshold 0.7
   
   # Build dataset (placeholder - implement your image source)
-  python cutlist_generator_v3.py --build_dataset
+  python golf_player_face_recognition.py --build_dataset
         """
     )
     

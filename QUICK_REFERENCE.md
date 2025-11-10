@@ -15,36 +15,36 @@ venv\Scripts\activate.bat
 
 ### Generate Embeddings
 ```bash
-python cutlist_generator_v3.py --generate_embeddings
+python golf_player_face_recognition.py --generate_embeddings
 ```
 
 ### Run Recognition
 ```bash
 # Webcam (default)
-python cutlist_generator_v3.py --recognize
+python golf_player_face_recognition.py --recognize
 
 # Specific source
-python cutlist_generator_v3.py --recognize --source 10
+python golf_player_face_recognition.py --recognize --source 10
 
 # With threshold
-python cutlist_generator_v3.py --recognize --source 10 --threshold 0.7
+python golf_player_face_recognition.py --recognize --source 10 --threshold 0.7
 ```
 
 ### Change Model
 ```bash
 # Balanced (default)
-python cutlist_generator_v3.py --recognize --model buffalo_l
+python golf_player_face_recognition.py --recognize --model buffalo_l
 
 # More accurate
-python cutlist_generator_v3.py --recognize --model buffalo_sc
+python golf_player_face_recognition.py --recognize --model buffalo_sc
 
 # Faster
-python cutlist_generator_v3.py --recognize --model buffalo_s
+python golf_player_face_recognition.py --recognize --model buffalo_s
 ```
 
 ### Help
 ```bash
-python cutlist_generator_v3.py --help
+python golf_player_face_recognition.py --help
 ```
 
 ## Output Format
@@ -55,7 +55,7 @@ python cutlist_generator_v3.py --help
 ## File Structure
 ```
 project/
-├── cutlist_generator_v3.py    # Main script
+├── golf_player_face_recognition.py    # Main script
 ├── requirements.txt            # Dependencies
 ├── setup.sh / setup.bat        # Setup scripts
 ├── dataset/                    # Player images
@@ -73,10 +73,10 @@ project/
 ## Troubleshooting
 ```bash
 # Embeddings not found
-python cutlist_generator_v3.py --generate_embeddings
+python golf_player_face_recognition.py --generate_embeddings
 
 # Can't open video source
-python cutlist_generator_v3.py --recognize --source 0  # Try 0, 1, 2...
+python golf_player_face_recognition.py --recognize --source 0  # Try 0, 1, 2...
 
 # Check Python version
 python --version  # Should be 3.10+
@@ -93,7 +93,7 @@ pip install -r requirements.txt
 
 ## Web Server Integration (Future)
 ```bash
-python cutlist_generator_v3.py --recognize --output_url http://localhost:8000/api
+python golf_player_face_recognition.py --recognize --output_url http://localhost:8000/api
 ```
 
 Expected POST format:

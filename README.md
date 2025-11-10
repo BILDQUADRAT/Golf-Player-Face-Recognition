@@ -52,7 +52,7 @@ pip install -r requirements.txt
 First, you need to build a dataset of player images:
 
 ```bash
-python cutlist_generator_v3.py --build_dataset
+python golf_player_face_recognition.py --build_dataset
 ```
 
 **Note:** The dataset building function is a placeholder. You'll need to add your own image source/download logic in the `build_dataset_with_progress()` method.
@@ -73,7 +73,7 @@ dataset/
 Once you have images, generate the face embeddings database:
 
 ```bash
-python cutlist_generator_v3.py --generate_embeddings
+python golf_player_face_recognition.py --generate_embeddings
 ```
 
 This creates `player_embeddings.pkl` containing facial features for each player.
@@ -82,17 +82,17 @@ This creates `player_embeddings.pkl` containing facial features for each player.
 
 **From webcam (default):**
 ```bash
-python cutlist_generator_v3.py --recognize
+python golf_player_face_recognition.py --recognize
 ```
 
 **From specific video source:**
 ```bash
-python cutlist_generator_v3.py --recognize --source 10
+python golf_player_face_recognition.py --recognize --source 10
 ```
 
 **With custom confidence threshold:**
 ```bash
-python cutlist_generator_v3.py --recognize --source 0 --threshold 0.7
+python golf_player_face_recognition.py --recognize --source 0 --threshold 0.7
 ```
 
 ## Advanced Options
@@ -118,7 +118,7 @@ The system supports multiple InsightFace models:
 - **buffalo_s** - Faster but less accurate
 
 ```bash
-python cutlist_generator_v3.py --recognize --model buffalo_sc
+python golf_player_face_recognition.py --recognize --model buffalo_sc
 ```
 
 ### Adjusting Recognition Threshold
@@ -145,7 +145,7 @@ The system is prepared for web server integration. To enable:
 2. Use the `--output_url` parameter:
 
 ```bash
-python cutlist_generator_v3.py --recognize --output_url http://your-server/api/player
+python golf_player_face_recognition.py --recognize --output_url http://your-server/api/player
 ```
 
 The system will POST JSON data in this format:
@@ -161,7 +161,7 @@ The system will POST JSON data in this format:
 
 ```
 .
-├── cutlist_generator_v3.py    # Main application
+├── golf_player_face_recognition.py    # Main application
 ├── requirements.txt            # Python dependencies
 ├── setup.sh                    # Linux/Mac setup script
 ├── setup.bat                   # Windows setup script

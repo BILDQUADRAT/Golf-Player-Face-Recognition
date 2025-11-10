@@ -161,10 +161,10 @@ if __name__ == "__main__":
 **After (v3):**
 ```bash
 # Much more flexible
-python cutlist_generator_v3.py --recognize --source 10 --threshold 0.65
+python golf_player_face_recognition.py --recognize --source 10 --threshold 0.65
 
 # Or with help
-python cutlist_generator_v3.py --help
+python golf_player_face_recognition.py --help
 ```
 
 ---
@@ -220,13 +220,13 @@ python cutlist_generator_v3.py --help
 cp -r old_project/dataset ./dataset
 
 # 3. Generate new embeddings
-python cutlist_generator_v3.py --generate_embeddings
+python golf_player_face_recognition.py --generate_embeddings
 
 # 4. Run recognition (same video source as before)
-python cutlist_generator_v3.py --recognize --source 10 --threshold 0.65
+python golf_player_face_recognition.py --recognize --source 10 --threshold 0.65
 
 # 5. When ready for web server
-python cutlist_generator_v3.py --recognize --source 10 --output_url http://your-server/api
+python golf_player_face_recognition.py --recognize --source 10 --output_url http://your-server/api
 ```
 
 ---
