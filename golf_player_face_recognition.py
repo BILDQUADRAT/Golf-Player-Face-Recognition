@@ -21,6 +21,7 @@ import pytesseract
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from pathlib import Path
+from ddgs import DDGS
 
 
 # Configuration
@@ -314,8 +315,78 @@ class PlayerRecognitionSystem:
             
             # Here you would integrate your image search/download logic
             # For now, this is a placeholder
-            print(f"Note: Image download not implemented - add your source here")
+            # Suche nach Bildern mit Retry bei Rate Limit
+            image_urls = []
+            retry_count = 0
+            max_retries = 5  # Max Versuche pro Player
+            while retry_count < max_retries:
+                try:
+                    with DDGS() as ddgs:
+                        results = ddgs.images(query=f"{player} LPGA golfer portrait face", max_results=200)
+                        image_urls = [result['image'] for result in results]
+                    break  # Erfolg: Aus Schleife ausbrechen
+                except ddgs.exceptions.RatelimitException as e:
+                    print(f"Rate Limit für {player}: {e}. Warte 60 Sekunden und versuche erneut (Versuch {retry_count + 1}/{max_retries}).")
+                    time.sleep(60)  # Pause bei Rate Limit
+                    retry_count += 1
+                except Exception as e:
+                    print(f"Fehler bei Suche für {player}: {e}. Speichere Fortschritt und starte neu.")
+                    # Speichere aktuellen Index (für Restart beim aktuellen Player)
+                    with open('progress.json', 'w') as f:
+                        json.dump({'last_player_index': idx}, f)
+                    return  # Beende Funktion, User startet neu
             
+            if not image_urls and retry_count >= max_retries:
+                print(f"Maximale Retries für {player} erreicht. Überspringe.")
+                continue
+            
+            # Herunterladen und Cropping mit InsightFace
+            for i, url in enumerate(image_urls):
+                try:
+                    temp_path = f"{player_dir}/temp_{i}.jpg"
+                    # Download mit Timeout
+                    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                    with urllib.request.urlopen(req, timeout=30) as response:
+                        with open(temp_path, 'wb') as f:
+                            f.write(response.read())
+                    
+                    img = cv2.imread(temp_path)
+                    if img is None: continue
+                    
+                    # Prüfe Bildbreite
+                    if img.shape[1] > 1200:  # Bildbreite > 1200px: Ganzes Bild speichern
+                        save_path = f"{player_dir}/full_{i}.jpg"
+                        cv2.imwrite(save_path, img)
+                        print(f"Ganzes Bild gespeichert: {player} Bild {i} (Breite: {img.shape[1]}px)")
+                    else:  # Andernfalls: Crop speichern, wenn Gesicht gefunden
+                        faces = self.app.get(img)
+                        if len(faces) > 0:
+                            best_face = faces[0]  # Beste Detection
+                            bbox = best_face.bbox.astype(int)
+                            crop = img[bbox[1]:bbox[3], bbox[0]:bbox[2]]
+                            # Nur speichern, wenn Crop größer als 500px (Höhe und Breite)
+                            if crop.shape[0] > 500 and crop.shape[1] > 500:
+                                cv2.imwrite(f"{player_dir}/face_{i}.jpg", crop)
+                                print(f"Gespeichert: {player} Bild {i} (Größe: {crop.shape[1]}x{crop.shape[0]})")
+                            else:
+                                print(f"Übersprungen: {player} Bild {i} (Größe zu klein: {crop.shape[1]}x{crop.shape[0]})")
+                        else:
+                            print(f"Kein Gesicht gefunden: {player} Bild {i}")
+                    
+                    os.remove(temp_path)
+                except urllib.error.URLError as e:
+                    if 'timeout' in str(e).lower():
+                        print(f"Timeout bei {url} für {player}. Speichere Fortschritt und starte neu.")
+                        # Speichere aktuellen Index (für Restart beim aktuellen Player)
+                        with open('progress.json', 'w') as f:
+                            json.dump({'last_player_index': idx}, f)
+                        # Neu starten: In realem Einsatz könnte man hier sys.exit(0) verwenden oder das Skript manuell neu starten
+                        return  # Für jetzt: Beende Funktion, User startet neu
+                    else:
+                        print(f"Fehler bei {url}: {e}")
+                except Exception as e:
+                    print(f"Fehler bei {url}: {e}")
+                
             # Save progress
             with open(progress_file, 'w') as f:
                 json.dump({'last_player_index': idx + 1}, f)

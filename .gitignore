@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Project specific
+dataset/
+*.pkl
+player_embeddings.pkl
+progress.json
+output/
+*.mp4
+*.avi
+temp_*.jpg
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Config (keep example, ignore actual)
+config.json
+
+# Logs
+*.log
+
+# Yolo Models
+*.pt
