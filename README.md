@@ -55,8 +55,6 @@ First, you need to build a dataset of player images:
 python golf_player_face_recognition.py --build_dataset
 ```
 
-**Note:** The dataset building function is a placeholder. You'll need to add your own image source/download logic in the `build_dataset_with_progress()` method.
-
 Alternatively, manually create the dataset structure:
 ```
 dataset/
