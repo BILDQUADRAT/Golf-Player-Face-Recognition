@@ -196,26 +196,7 @@ Run `--generate_embeddings` after building your dataset.
 
 This version uses:
 - **InsightFace 0.7.3+** with buffalo_l model (latest stable)
-- **Python 3.13 compatible** (uses modern type hints and dataclasses)
 - **ONNX Runtime 1.18+** for efficient inference
-
-### Key Changes from v2
-
-1. ✅ Removed graphics overlay API dependency
-2. ✅ Simplified output to console (with web server hooks)
-3. ✅ Updated to latest InsightFace models
-4. ✅ Python 3.13 compatibility
-5. ✅ Better code organization with classes
-6. ✅ Type hints for better IDE support
-7. ✅ Virtual environment support
-8. ✅ Cross-platform setup scripts
-
-## Performance
-
-On typical hardware:
-- **CPU**: ~2-3 FPS processing
-- **GPU (CUDA)**: ~10-15 FPS processing
-- **Memory**: ~1-2GB during recognition
 
 ## License
 
