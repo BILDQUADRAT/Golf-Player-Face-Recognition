@@ -453,22 +453,22 @@ class PlayerRecognitionSystem:
     
     def output_recognition(self, player_name: str, confidence: float):
         """
-        Output recognized player name
-        This is where web server integration will happen
+        Output recognized player name and confidence.
+        Also sends to web server if configured.
         """
         timestamp = time.strftime("%H:%M:%S")
         output_msg = f"[{timestamp}] Recognized: {player_name} (confidence: {confidence:.2f})"
         print(output_msg)
         
-        # TODO: Future web server integration
-        # if self.config.output_url:
-        #     try:
-        #         response = requests.post(
-        #             self.config.output_url,
-        #             json={'player': player_name, 'confidence': confidence, 'timestamp': timestamp}
-        #         )
-        #     except Exception as e:
-        #         print(f"Error sending to server: {e}")
+        # Send to web server
+        if self.config.output_url:
+            try:
+                requests.post(
+                    self.config.output_url,
+                    json={'player': player_name, 'confidence': confidence, 'timestamp': timestamp}
+                )
+            except Exception as e:
+                print(f"Error sending to server: {e}")
     
     def real_time_recognition(self, video_source: Optional[int] = None):
         """
