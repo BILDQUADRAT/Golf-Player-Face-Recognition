@@ -1,5 +1,5 @@
 """
-LPGA Player Face Recognition System
+LET Player Face Recognition System
 Updated for Python 3.13 with simplified output
 """
 
@@ -149,6 +149,35 @@ PLAYERS = [
 ]
 
 
+def scan_opencv_devices(max_devices: int = 10) -> List[Tuple[int, bool, Optional[str]]]:
+    """
+    Scan OpenCV device indices to see which ones work.
+    Returns list of (index, works, resolution_info) tuples.
+    """
+    print(f"Scanning OpenCV DirectShow devices (indices 0-{max_devices})...\n")
+    working_devices = []
+    
+    for idx in range(max_devices + 1):
+        cap = cv2.VideoCapture(idx, cv2.CAP_DSHOW)
+        
+        if cap.isOpened():
+            ret, frame = cap.read()
+            if ret and frame is not None:
+                width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                resolution = f"{width}x{height}"
+                working_devices.append((idx, True, resolution))
+                print(f"  [{idx}] ✓ Working - {resolution}")
+            else:
+                working_devices.append((idx, False, "Can't capture frames"))
+                print(f"  [{idx}] ✗ Opened but can't capture frames")
+            cap.release()
+        else:
+            print(f"  [{idx}] ✗ Not available")
+    
+    return working_devices
+
+
 # ---------- DIRECTSHOW DEVICE FUNCTIONS  ----------
 def list_directshow_devices() -> List[Tuple[int, str]]:
     """
@@ -171,24 +200,64 @@ def list_directshow_devices() -> List[Tuple[int, str]]:
     
     return devices
 
+def find_decklink_device_opencv() -> Optional[int]:
+    """
+    Find DeckLink device by trying to open each OpenCV device index.
+    This is more reliable than relying on pygrabber indices.
+    Returns OpenCV device index or None if not found.
+    """
+    print("Scanning for DeckLink device (this may take a moment)...")
+    
+    # Try indices 0-10 (most systems won't have more than 10 video devices)
+    for idx in range(11):
+        cap = cv2.VideoCapture(idx, cv2.CAP_DSHOW)
+        if cap.isOpened():
+            # Try to get backend name (not always available)
+            backend_name = cap.getBackendName()
+            
+            # Read one frame to verify it's working
+            ret, frame = cap.read()
+            cap.release()
+            
+            if ret:
+                # We found a working device - assume it's DeckLink if it's not 0
+                # (index 0 is usually a webcam)
+                if idx > 0:
+                    print(f"Found video device at index {idx}")
+                    return idx
+    
+    return None
+
 
 def find_decklink_device() -> Optional[int]:
     """
-    Find the first DeckLink device in DirectShow devices.
+    Find the first DeckLink device.
+    First tries pygrabber enumeration, then falls back to OpenCV scanning.
     Returns device index or None if not found.
     """
-    devices = list_directshow_devices()
+    # Try pygrabber first (fast)
+    if DIRECTSHOW_AVAILABLE:
+        devices = list_directshow_devices()
+        
+        for idx, name in devices:
+            if "decklink" in name.lower():
+                print(f"Found DeckLink device via pygrabber: {name} (index: {idx})")
+                
+                # Verify this index works with OpenCV
+                cap = cv2.VideoCapture(idx, cv2.CAP_DSHOW)
+                if cap.isOpened():
+                    ret, _ = cap.read()
+                    cap.release()
+                    if ret:
+                        return idx
+                    else:
+                        print(f"Warning: Device at index {idx} exists but can't capture frames")
+                else:
+                    print(f"Warning: pygrabber index {idx} doesn't work with OpenCV, trying scan...")
+                    break
     
-    if not devices:
-        return None
-    
-    # Look for device name containing "DeckLink"
-    for idx, name in devices:
-        if "decklink" in name.lower():
-            print(f"Found DeckLink device: {name} (index: {idx})")
-            return idx
-    
-    return None
+    # Fallback: scan through OpenCV indices
+    return find_decklink_device_opencv()
 
 
 # ---------- MAIN RECOGNITION SYSTEM  ----------
@@ -499,8 +568,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # List available DirectShow devices
+  # List DirectShow device names
   python golf_player_face_recognition.py --list-devices
+  
+  # Scan which OpenCV device indices actually work
+  python golf_player_face_recognition.py --scan-devices
   
   # Generate embeddings from dataset
   python golf_player_face_recognition.py --generate_embeddings
@@ -520,7 +592,9 @@ Examples:
     )
     
     parser.add_argument('--list-devices', action='store_true',
-                       help='List all available DirectShow video devices')
+                       help='List all available DirectShow device names')
+    parser.add_argument('--scan-devices', action='store_true',
+                       help='Scan OpenCV device indices to find working devices')
     parser.add_argument('--build_dataset', action='store_true',
                        help='Build player image dataset')
     parser.add_argument('--generate_embeddings', action='store_true',
@@ -539,7 +613,7 @@ Examples:
     
     args = parser.parse_args()
     
-    # Handle --list-devices separately
+    # Handle --list-devices
     if args.list_devices:
         print("Available DirectShow video devices:\n")
         devices = list_directshow_devices()
@@ -552,6 +626,13 @@ Examples:
             print("  No DirectShow devices found.")
             if not DIRECTSHOW_AVAILABLE:
                 print("\n  Note: pygrabber not installed. Install with: pip install pygrabber")
+        return
+    
+    # Handle --scan-devices
+    if args.scan_devices:
+        working_devices = scan_opencv_devices()
+        print(f"\nFound {len([d for d in working_devices if d[1]])} working device(s).")
+        print("\nUse --source <index> to select a specific device.")
         return
     
     # Create configuration
