@@ -23,6 +23,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from ddgs import DDGS
 
+# DirectShow device enumeration
+try:
+    from pygrabber.dshow_graph import FilterGraph
+    DIRECTSHOW_AVAILABLE = True
+except ImportError:
+    DIRECTSHOW_AVAILABLE = False
+    print("Warning: pygrabber not available. DeckLink auto-detection disabled.")
+
 
 # Configuration
 @dataclass
@@ -35,7 +43,7 @@ class Config:
     processing_fps: float = 5.0  # Process every N frames per second
     cooldown_seconds: float = 1.0  # Minimum time between name changes
     output_url: Optional[str] = None  # Will be used for web server integration
-
+    
 
 # List of Costa Del Sol entries
 PLAYERS = [
@@ -141,6 +149,49 @@ PLAYERS = [
 ]
 
 
+# ---------- DIRECTSHOW DEVICE FUNCTIONS  ----------
+def list_directshow_devices() -> List[Tuple[int, str]]:
+    """
+    List all available DirectShow video devices.
+    Returns list of (index, device_name) tuples.
+    """
+    if not DIRECTSHOW_AVAILABLE:
+        print("Error: pygrabber not available. Install with: pip install pygrabber")
+        return []
+    
+    devices = []
+    graph = FilterGraph()
+    
+    try:
+        device_list = graph.get_input_devices()
+        for idx, device_name in enumerate(device_list):
+            devices.append((idx, device_name))
+    except Exception as e:
+        print(f"Error enumerating DirectShow devices: {e}")
+    
+    return devices
+
+
+def find_decklink_device() -> Optional[int]:
+    """
+    Find the first DeckLink device in DirectShow devices.
+    Returns device index or None if not found.
+    """
+    devices = list_directshow_devices()
+    
+    if not devices:
+        return None
+    
+    # Look for device name containing "DeckLink"
+    for idx, name in devices:
+        if "decklink" in name.lower():
+            print(f"Found DeckLink device: {name} (index: {idx})")
+            return idx
+    
+    return None
+
+
+# ---------- MAIN RECOGNITION SYSTEM  ----------
 class PlayerRecognitionSystem:
     """Main class for LPGA player face recognition"""
     
@@ -350,20 +401,47 @@ class PlayerRecognitionSystem:
         #     except Exception as e:
         #         print(f"Error sending to server: {e}")
     
-    def real_time_recognition(self, video_source: int = 0):
+    def real_time_recognition(self, video_source: Optional[int] = None):
         """
-        Real-time face recognition from video source
-        Simplified version that just outputs player names
+        Real-time face recognition from video source.
+        If video_source is None, automatically detects DeckLink device.
         """
         if not self.load_embeddings():
             return
         
-        cap = cv2.VideoCapture(video_source)
+        # Auto-detect DeckLink if no source specified
+        if video_source is None:
+            print("Auto-detecting DeckLink device...")
+            video_source = find_decklink_device()
+            
+            if video_source is None:
+                print("Error: No DeckLink device found.")
+                print("\nAvailable DirectShow devices:")
+                devices = list_directshow_devices()
+                if devices:
+                    for idx, name in devices:
+                        print(f"  [{idx}] {name}")
+                    print("\nUse --source <index> to specify a device manually.")
+                else:
+                    print("  No DirectShow devices found.")
+                return
+        
+        # Open video capture with DirectShow backend
+        cap = cv2.VideoCapture(video_source, cv2.CAP_DSHOW)
+        
         if not cap.isOpened():
             print(f"Error: Cannot open video source {video_source}")
             return
         
-        print(f"\nStarting real-time recognition from source {video_source}")
+        # Get video properties
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        
+        print(f"\nStarting real-time recognition")
+        print(f"Video source: {video_source}")
+        print(f"Resolution: {width}x{height}")
+        print(f"FPS: {fps}")
         print(f"Threshold: {self.config.threshold}")
         print(f"Press 'q' to quit\n")
         
@@ -417,32 +495,40 @@ class PlayerRecognitionSystem:
 def main():
     """Main entry point with command line interface"""
     parser = argparse.ArgumentParser(
-        description='LPGA Player Face Recognition System',
+        description='LPGA Player Face Recognition System with DeckLink Support',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
+  # List available DirectShow devices
+  python golf_player_face_recognition.py --list-devices
+  
   # Generate embeddings from dataset
   python golf_player_face_recognition.py --generate_embeddings
   
-  # Run real-time recognition on webcam
-  python golf_player_face_recognition.py --recognize --source 0
+  # Run recognition (auto-detects DeckLink)
+  python golf_player_face_recognition.py --recognize
+  
+  # Run with manual device selection
+  python golf_player_face_recognition.py --recognize --source 2
   
   # Run with custom threshold
-  python golf_player_face_recognition.py --recognize --source 0 --threshold 0.7
+  python golf_player_face_recognition.py --recognize --threshold 0.7
   
   # Build dataset (placeholder - implement your image source)
   python golf_player_face_recognition.py --build_dataset
         """
     )
     
+    parser.add_argument('--list-devices', action='store_true',
+                       help='List all available DirectShow video devices')
     parser.add_argument('--build_dataset', action='store_true',
                        help='Build player image dataset')
     parser.add_argument('--generate_embeddings', action='store_true',
                        help='Generate face embeddings from dataset')
     parser.add_argument('--recognize', action='store_true',
                        help='Run real-time face recognition')
-    parser.add_argument('--source', type=int, default=0,
-                       help='Video source (default: 0 for webcam)')
+    parser.add_argument('--source', type=int, default=None,
+                       help='Video source index (default: auto-detect DeckLink)')
     parser.add_argument('--threshold', type=float, default=0.65,
                        help='Recognition confidence threshold (default: 0.65)')
     parser.add_argument('--model', type=str, default='buffalo_l',
@@ -452,6 +538,21 @@ Examples:
                        help='Web server URL for sending recognition results (future use)')
     
     args = parser.parse_args()
+    
+    # Handle --list-devices separately
+    if args.list_devices:
+        print("Available DirectShow video devices:\n")
+        devices = list_directshow_devices()
+        if devices:
+            for idx, name in devices:
+                is_decklink = "decklink" in name.lower()
+                marker = " ← DeckLink" if is_decklink else ""
+                print(f"  [{idx}] {name}{marker}")
+        else:
+            print("  No DirectShow devices found.")
+            if not DIRECTSHOW_AVAILABLE:
+                print("\n  Note: pygrabber not installed. Install with: pip install pygrabber")
+        return
     
     # Create configuration
     config = Config(
