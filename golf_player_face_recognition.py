@@ -530,8 +530,11 @@ class PlayerRecognitionSystem:
             # Process at configured FPS rate
             if current_time - last_time >= (1.0 / self.config.processing_fps):
                 faces = self.app.get(frame)
-                
-                for face in faces:
+                # Sort faces by bounding box area (largest first)
+                faces = sorted(faces, key=lambda f: (f.bbox[2]-f.bbox[0]) * (f.bbox[3]-f.bbox[1]), reverse=True)
+
+                # Check largest face first
+                for idx, face in enumerate(faces):
                     player_name, confidence = self.recognize_face(face.embedding)
                     
                     if player_name:
@@ -548,7 +551,14 @@ class PlayerRecognitionSystem:
                             cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), 2)
                             cv2.putText(frame, f"{player_name}", (bbox[0], bbox[1]-10),
                                       cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
-                
+                        break  # Important: stop checking other faces
+                    elif idx == 0 and len(faces) > 1:
+                        # Largest face didn't match, continue to check others
+                        continue
+                    else:
+                        # No more faces or already checked all
+                        break
+                    
                 last_time = current_time
             
             # Optional: Show frame (comment out for headless operation)
