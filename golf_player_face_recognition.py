@@ -9,6 +9,7 @@ import numpy as np
 import insightface
 from insightface.app import FaceAnalysis
 import urllib.request
+import requests
 import argparse
 import pickle
 import json
@@ -465,7 +466,7 @@ class PlayerRecognitionSystem:
             try:
                 requests.post(
                     self.config.output_url,
-                    json={'player': player_name, 'confidence': confidence, 'timestamp': timestamp}
+                    json={'player': player_name, 'confidence': f"{confidence:.2f}", 'timestamp': timestamp}
                 )
             except Exception as e:
                 print(f"Error sending to server: {e}")
