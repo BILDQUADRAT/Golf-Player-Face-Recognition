@@ -1,6 +1,3 @@
-# Configuration file for LPGA Face Recognition System
-# Copy this to config.json and adjust as needed
-
 {
     "dataset_dir": "dataset",
     "embeddings_file": "player_embeddings.pkl",
