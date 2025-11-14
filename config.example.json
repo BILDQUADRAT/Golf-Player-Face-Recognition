@@ -5,7 +5,7 @@
     "threshold": 0.65,
     "processing_fps": 5.0,
     "cooldown_seconds": 1.0,
-    "output_url": null,
+    "output_url": "http://192.168.100.10:5000",
     
     "video_settings": {
         "default_source": 0,
