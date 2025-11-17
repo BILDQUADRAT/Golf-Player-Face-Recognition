@@ -43,7 +43,7 @@ class Config:
     threshold: float = 0.65
     processing_fps: float = 5.0  # Process every N frames per second
     cooldown_seconds: float = 1.0  # Minimum time between name changes
-    output_url: Optional[str] = None  # Will be used for web server integration
+    output_url: Optional[str] = "http://192.168.100.10:5000/api/player"  # Will be used for web server integration
     
 
 # List of Costa Del Sol entries
@@ -619,7 +619,7 @@ Examples:
     parser.add_argument('--model', type=str, default='buffalo_l',
                        choices=['buffalo_l', 'buffalo_sc', 'buffalo_s'],
                        help='InsightFace model to use (default: buffalo_l)')
-    parser.add_argument('--output_url', type=str, default=None,
+    parser.add_argument('--output_url', type=str, default="http://192.168.100.10:5000/api/player",
                        help='Web server URL for sending recognition results (future use)')
     
     args = parser.parse_args()
