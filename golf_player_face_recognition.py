@@ -621,6 +621,8 @@ Examples:
                        help='InsightFace model to use (default: buffalo_l)')
     parser.add_argument('--output_url', type=str, default="http://192.168.100.10:5000/api/player",
                        help='Web server URL for sending recognition results (future use)')
+    parser.add_argument('--test_mode', action='store_true',
+                       help='Enable test mode')
     
     args = parser.parse_args()
     
@@ -645,6 +647,21 @@ Examples:
         print(f"\nFound {len([d for d in working_devices if d[1]])} working device(s).")
         print("\nUse --source <index> to select a specific device.")
         return
+    
+    # Handle --test_mode
+    if args.test_mode:
+        print("Test mode enabled - sending random player names to server.")
+        while True:
+            player = np.random.choice(PLAYERS)
+            try:
+                requests.post(
+                    args.output_url,
+                    json={'player': player, 'confidence': "1.00", 'timestamp': time.strftime("%H:%M:%S")}
+                )
+                print(f"Sent: {player}")
+                time.sleep(20)
+            except Exception as e:
+                print(f"Error sending to server: {e}")
     
     # Create configuration
     config = Config(
